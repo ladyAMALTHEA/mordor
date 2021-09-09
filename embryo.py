@@ -169,3 +169,6 @@ def get_traces(channel_dict,
     for i, out in enumerate(out_channels):
         ax[i].plot(out_traces[out], label=out)
         ax[i].set_title(out)
+
+    # example for making outputs
+    return out_traces, variablex, variabley, all_the_answers
