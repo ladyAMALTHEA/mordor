@@ -3,10 +3,10 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 import czifile
-from pathlib import Path
+# from pathlib import Path
 import os
 from skimage import morphology, exposure, filters
-from skimage.feature import canny
+# from skimage.feature import canny
 from skimage.measure import regionprops, regionprops_table, label
 from scipy import ndimage, misc
 
@@ -47,6 +47,64 @@ def get_thresholded(data, method='OHTSU', shape_channel='DAPI', z_plane=None, bk
         zshape = exposure.adjust_gamma(zshape)
         zshape = filters.apply_hysteresis_threshold(zshape, bkgd, max_signal)
         zshape = morphology.binary_closing(zshape)
+    elif method.upper() == 'JEFE_1':
+        #JEFE_1 THRESHOLD
+        footprint=morphology.disk(15)
+        zshape = data[shape_channel].std(0)
+        bkgd = zshape.min()
+        zshape -= bkgd
+        zshape[zshape < 0] = 0
+        bkgd = filters.threshold_otsu(zshape)
+        zshape -= bkgd
+        zshape[zshape < 0] = 0
+        zshape = exposure.adjust_gamma(zshape)
+        bkgd = filters.threshold_otsu(zshape)
+        max_signal = np.max(zshape)-1
+        zshape = filters.threshold_sauvola(zshape)
+        zshape = filters.apply_hysteresis_threshold(zshape, bkgd, max_signal)
+        zshape = morphology.binary_erosion(zshape, footprint)
+        zshape = morphology.binary_closing(zshape)
+        zshape = morphology.binary_dilation(zshape, footprint)
+        zshape = morphology.binary_closing(zshape)
+        zshape = morphology.binary_erosion(zshape, footprint)
+    elif method.upper() == 'JEFE_2':
+        #JEFE_2 THRESHOLD
+        zshape = data[shape_channel].std(0)
+        bkgd = zshape.min()
+        zshape -= bkgd
+        zshape[zshape < 0] = 0
+        bkgd = filters.threshold_otsu(zshape)
+        zshape -= bkgd
+        zshape[zshape < 0] = 0
+        zshape = exposure.adjust_gamma(zshape)
+        bkgd = filters.threshold_otsu(np.nanquantile(zshape.flatten(), 0.75))
+        max_signal = np.max(zshape)-1
+        zshape = filters.apply_hysteresis_threshold(zshape, bkgd, max_signal)
+        zshape = filters.threshold_sauvola(zshape)#,r=bkgd)
+        zshape = morphology.binary_closing(zshape)
+        footprint=morphology.disk(25)
+        zshape = morphology.binary_dilation(zshape, footprint)
+        zshape = morphology.binary_closing(zshape)
+        zshape = morphology.binary_erosion(zshape, footprint)
+    elif method.upper() == 'JEFE_3':
+        # JEFE_3 THRESHOLD
+        footprint=morphology.disk(25)
+        zshape = data[shape_channel].std(0)
+        bkgd = zshape.min()
+        zshape -= bkgd
+        zshape[zshape < 0] = 0
+        bkgd = filters.threshold_otsu(zshape)
+        zshape -= bkgd
+        zshape[zshape < 0] = 0
+        zshape = exposure.adjust_gamma(zshape)
+        bkgd = filters.threshold_otsu(np.nanquantile(zshape.flatten(), 0.7))
+        max_signal = np.max(zshape)-1
+        zshape = filters.apply_hysteresis_threshold(zshape, bkgd, max_signal)
+        zshape = filters.threshold_sauvola(zshape)
+        zshape = morphology.binary_closing(zshape)
+        zshape = morphology.binary_dilation(zshape, footprint)
+        zshape = morphology.binary_closing(zshape)
+        zshape = morphology.binary_erosion(zshape, footprint)
 
     return zshape
 
@@ -103,25 +161,60 @@ def show_orientation(zshape, rotated_AP, xs, ys, filename=None, path=None):
     return fig
 
 
-def show_thresh_test(data, 
+def show_thresh_test_v1(data, 
                     methods_list=['OHTSU', 'GAMMA', 'DILL'], 
                     shape_channel='DAPI', 
                     ap_channel='DAPI', 
                     z_plane=None, 
                     bkgd=200):
-    fig, axs = plt.subplots(len(methods_list), 2)#, figsize=(10*len(methods_list), 20))
+    fig, axs = plt.subplots(len(methods_list), 2, figsize=(10, 5*len(methods_list)))
     for i, method in enumerate(methods_list):
         zshape, _, rotated_AP, xs, ys = get_orientation(data, method, shape_channel, ap_channel, z_plane, bkgd)
         axs[i, 0].imshow(zshape, cmap=plt.cm.gray)
-        axs[i, 0].plot((xs[3], xs[1]), (ys[3], ys[1]), '-y', linewidth=10) #minor axis line
-        axs[i, 0].plot((xs[4], xs[2]), (ys[4], ys[2]), '-m', linewidth=10) #major axis line
-        axs[i, 0].plot(xs[0], ys[0], '.g', markersize=25)
+        axs[i, 0].plot((xs[3], xs[1]), (ys[3], ys[1]), '-y', linewidth=7) #minor axis line
+        axs[i, 0].plot((xs[4], xs[2]), (ys[4], ys[2]), '-m', linewidth=7) #major axis line
+        axs[i, 0].plot(xs[0], ys[0], '.g', markersize=15)
         axs[i, 0].set_title(f'{method}: masked')
+        axs[i, 0].set_xticks([])
+        axs[i, 0].set_yticks([])
         axs[i, 1].imshow(rotated_AP, cmap=plt.cm.gray)
         axs[i, 1].set_title(f'{method}: rotated')
+        axs[i, 1].set_xticks([])
+        axs[i, 1].set_yticks([])
 
     return fig
 
+def show_thresh_test_v2(data, 
+                    methods_list=['JEFE_1', 'JEFE_2', 'JEFE_3'], 
+                    shape_channel='DAPI', 
+                    ap_channel='DAPI', 
+                    z_plane=None, 
+                    bkgd=200):
+    fig, axs = plt.subplots(len(methods_list), 2, figsize=(10, 5*len(methods_list)))
+    for i, method in enumerate(methods_list):
+        zshape, _, rotated_AP, xs, ys = get_orientation(data, method, shape_channel, ap_channel, z_plane, bkgd)
+        axs[i, 0].imshow(zshape, cmap=plt.cm.gray)
+        axs[i, 0].plot((xs[3], xs[1]), (ys[3], ys[1]), '-y', linewidth=7) #minor axis line
+        axs[i, 0].plot((xs[4], xs[2]), (ys[4], ys[2]), '-m', linewidth=7) #major axis line
+        axs[i, 0].plot(xs[0], ys[0], '.g', markersize=15)
+        axs[i, 0].set_title(f'{method}: masked')
+        axs[i, 0].set_xticks([])
+        axs[i, 0].set_yticks([])
+        axs[i, 1].imshow(rotated_AP, cmap=plt.cm.gray)
+        axs[i, 1].set_title(f'{method}: rotated')
+        axs[i, 1].set_xticks([])
+        axs[i, 1].set_yticks([])
+
+    return fig
+
+def load_data(path, channel_dict, channel_list):
+    czi = czifile.imread(path)
+    img=czi.squeeze()
+    data = {}
+    for channel in channel_list:
+        data[channel] = img[channel_dict[channel],...]
+    
+    return data, img
 
 
 # def get_oriented_plane(data, z_plane, rotation_axis, flip_hor=False):

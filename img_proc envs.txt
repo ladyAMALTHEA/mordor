@@ -1,0 +1,12 @@
+module spider conda
+module load conda2/4.2.13
+
+conda create -n imgproc python=3.8.12
+conda activate imgproc
+pip install matplotlib numpy scipy czifile scikit-image
+
+
+
+
+
+
