@@ -5,7 +5,7 @@ import scipy.stats as stats
 import json
 
 def load_csv_database(filename):
-    with open(filename, newline='') as csvfile:
+    with open(filename, newline='', encoding='utf-8-sig') as csvfile:
         reader = csv.DictReader(csvfile)
         database = {}
         for row in reader:
@@ -27,13 +27,13 @@ def get_all_traces(database, data_channel_list, channel_dict, channel_list, work
         path = os.path.join(work_dir, filename) + '.czi'
         data, _ = load_data(path, channel_dict, channel_list)
         #start getting traces
-        this_dict['traces'], qc_imgs = get_traces(data, data_channel_list, flip, thresh_method, dv_channel, z_offset)
+        this_dict['traces'], qc_imgs = get_traces(data, flip, data_channel_list, thresh_method, dv_channel, z_offset=z_offset)
         if save:
             save_name = f'{path[:-4]}_qcFig'
             make_qc_figs(qc_imgs, this_dict['traces'], save_name)
         all_traces[filename] = this_dict
     if save:
-        with open("all_traces.json", "w") as outfile:
+        with open(os.path.join(work_dir, "all_traces.json"), "w") as outfile:
             json.dump(all_traces, outfile)
     return all_traces
 
@@ -195,6 +195,7 @@ def make_qc_figs(imgs, traces, save_name=None):
     imshow(imgs['dorsal_check'], axs[1,0], 'Dorsal Check')
     imshow(imgs['ventral_check'], axs[1,1], 'Ventral Check')
     for i, (channel, channel_traces) in enumerate(traces.items()):
+        #plot mean traces
         mean = np.array(channel_traces).mean(0)
         error = np.array(channel_traces).std(0)
         axs[2+i, 0].fill_between(np.arange(mean.shape[0]), mean-error, mean+error, alpha=0.5, linewidth=0)
