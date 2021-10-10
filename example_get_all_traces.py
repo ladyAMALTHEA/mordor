@@ -9,6 +9,7 @@ channel_list = ['DAPI', 'gt', 'pho', 'hb'] #keep for iteration
 shape_channel = 'DAPI'
 ap_channel = 'DAPI'
 dv_channel = 'hb'
+z_offset = 3
 
 database = load_csv_database(csv_file)
-get_all_traces(database, save=True)
+get_all_traces(database, channel_dict, channel_list, work_dir, dv_channel, z_offset, save=True)

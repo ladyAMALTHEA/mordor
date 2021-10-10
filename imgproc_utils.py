@@ -161,31 +161,8 @@ def show_orientation(zshape, rotated_AP, xs, ys, filename=None, path=None):
     return fig
 
 
-def show_thresh_test_v1(data, 
-                    methods_list=['OHTSU', 'GAMMA', 'DILL'], 
-                    shape_channel='DAPI', 
-                    ap_channel='DAPI', 
-                    z_plane=None, 
-                    bkgd=200):
-    fig, axs = plt.subplots(len(methods_list), 2, figsize=(10, 5*len(methods_list)))
-    for i, method in enumerate(methods_list):
-        zshape, _, rotated_AP, xs, ys = get_orientation(data, method, shape_channel, ap_channel, z_plane, bkgd)
-        axs[i, 0].imshow(zshape, cmap=plt.cm.gray)
-        axs[i, 0].plot((xs[3], xs[1]), (ys[3], ys[1]), '-y', linewidth=7) #minor axis line
-        axs[i, 0].plot((xs[4], xs[2]), (ys[4], ys[2]), '-m', linewidth=7) #major axis line
-        axs[i, 0].plot(xs[0], ys[0], '.g', markersize=15)
-        axs[i, 0].set_title(f'{method}: masked')
-        axs[i, 0].set_xticks([])
-        axs[i, 0].set_yticks([])
-        axs[i, 1].imshow(rotated_AP, cmap=plt.cm.gray)
-        axs[i, 1].set_title(f'{method}: rotated')
-        axs[i, 1].set_xticks([])
-        axs[i, 1].set_yticks([])
-
-    return fig
-
-def show_thresh_test_v2(data, 
-                    methods_list=['JEFE_1', 'JEFE_2', 'JEFE_3'], 
+def show_thresh_test(data, 
+                    methods_list=['OHTSU', 'GAMMA', 'DILL', 'JEFE_1', 'JEFE_2', 'JEFE_3'], 
                     shape_channel='DAPI', 
                     ap_channel='DAPI', 
                     z_plane=None, 
