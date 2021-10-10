@@ -30,7 +30,7 @@ def get_all_traces(database, data_channel_list, channel_dict, channel_list, work
         this_dict['traces'], qc_imgs = get_traces(data, data_channel_list, flip, thresh_method, dv_channel, z_offset)
         if save:
             save_name = f'{path[:-4]}_qcFig'
-        make_qc_figs(qc_imgs, this_dict['traces'], save_name)
+            make_qc_figs(qc_imgs, this_dict['traces'], save_name)
         all_traces[filename] = this_dict
     if save:
         with open("all_traces.json", "w") as outfile:
@@ -54,7 +54,7 @@ def get_traces(data,
 
     #get orientation
     zshape, rotation_axis, rotated_AP, xs, ys = get_orientation(data, method, shape_channel, ap_channel, z_plane, bkgd)
-    dv_divide, im_filled = make_mask(zshape. xs, ys)
+    dv_divide, im_filled = make_mask(zshape, xs, ys)
     rotated_zdv = orient(data[dv_channel][z_plane,:,:], rotation_axis, flip)
     dorsal_mask, dorsal, ventral = get_dv(dv_divide, rotated_zdv, bkgd)
 
@@ -157,17 +157,33 @@ def orient(zplane, rotation_axis, flip):
 
 def make_qc_figs(imgs, traces, save_name=None):
     fig, axs = plt.subplots(2 + len(traces), 2, figsize=(10, 10 + 5*len(traces)))
-    axs[0,0].imshow(imgs['emb_mask'], title='Embryo Mask', cmap=plt.cm.gray)
-    axs[0,1].imshow(imgs['dv_divide'], title='Dorsal/Ventral Masks', cmap=plt.cm.gray)
-    axs[1,0].imshow(imgs['dorsal_check'], title='Dorsal Check', cmap=plt.cm.gray)
-    axs[1,1].imshow(imgs['ventral_check'], title='Ventral Check', cmap=plt.cm.gray)
+    axs[0,0].imshow(imgs['emb_mask'], cmap=plt.cm.gray)
+    axs[0,0].set_title('Embryo Mask')
+    axs[0,0].set_xticks([])
+    axs[0,0].set_yticks([])
+    axs[0,1].imshow(imgs['dv_divide'], cmap=plt.cm.gray)
+    axs[0,1].set_title('Dorsal/Ventral Masks')
+    axs[0,1].set_xticks([])
+    axs[0,1].set_yticks([])
+    axs[1,0].imshow(imgs['dorsal_check'], cmap=plt.cm.gray)
+    axs[1,0].set_title('Dorsal Check')
+    axs[1,0].set_xticks([])
+    axs[1,0].set_yticks([])
+    axs[1,1].imshow(imgs['ventral_check'], cmap=plt.cm.gray)
+    axs[1,1].set_title('Ventral Check')
+    axs[1,1].set_xticks([])
+    axs[1,1].set_yticks([])
     for i, (channel, channel_traces) in enumerate(traces.items()):
         mean = np.array(channel_traces).mean(0)
         error = np.array(channel_traces).std(0)
         axs[2+i, 0].fill_between(np.arange(mean.shape[0]), mean-error, mean+error, alpha=0.5, linewidth=0)
         axs[2+i, 0].plot(mean)
+        axs[2+i, 0].set_title(f'{channel} Mean Trace (w/ Std)')
 
-        axs[2+i, 1].imshow(imgs[channel][1], title=f'{channel} Check', cmap=plt.cm.gray)
+        axs[2+i, 1].imshow(imgs[channel][1], cmap=plt.cm.gray)
+        axs[2+i, 1].set_title(f'{channel} Check')
+        axs[2+i, 1].set_xticks([])
+        axs[2+i, 1].set_yticks([])
     if save_name is not None:
         fig.savefig(save_name)
 
@@ -187,3 +203,9 @@ def format_trace_datastructure(trace_sets, excluded=None):
                 else:
                     datastructure[genotype][gene] = np.append(datastructure[genotype][gene], np.array(traces), 0)
     return datastructure
+
+def imshow(img, ax, title):
+    ax.imshow(img, cmap=plt.cm.gray)
+    ax.set_title(title)
+    ax.set_xticks([])
+    ax.set_yticks([])
