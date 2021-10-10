@@ -24,7 +24,7 @@ def get_all_traces(database, data_channel_list, channel_dict, channel_list, work
         thresh_method = info['thresh_method']
         flip = info['flip'].upper() == 'TRUE'
         #load the data
-        path = os.path.join(work_dir, filename)
+        path = os.path.join(work_dir, filename) + '.czi'
         data, _ = load_data(path, channel_dict, channel_list)
         #start getting traces
         this_dict['traces'], qc_imgs = get_traces(data, data_channel_list, flip, thresh_method, dv_channel, z_offset)
@@ -53,8 +53,9 @@ def get_traces(data,
     z_planes = [z_plane - z_offset, z_plane, z_plane + z_offset]
 
     #get orientation
-    zshape, rotation_axis, rotated_AP, xs, ys = get_orientation(data, method, shape_channel, ap_channel, z_plane, bkgd)
-    dv_divide, im_filled = make_mask(zshape, xs, ys)
+    zshape, rotation_axis, _, _, _ = get_orientation(data, method, shape_channel, ap_channel, z_plane, bkgd)
+    rot_zshape, rot_xs, rot_ys = orient_mask(zshape, rotation_axis, flip, bkgd)
+    dv_divide, im_filled = make_mask(rot_zshape, rot_xs, rot_ys)
     rotated_zdv = orient(data[dv_channel][z_plane,:,:], rotation_axis, flip)
     dorsal_mask, dorsal, ventral = get_dv(dv_divide, rotated_zdv, bkgd)
 
@@ -123,7 +124,7 @@ def get_dv(dv_divide, rotated_zdv, bkgd=200):
     dv_regions = regionprops(dv_label)
 
     rotated_zdv = exposure.adjust_gamma(rotated_zdv) #normalize for better detection
-    rotated_zdv = filters.apply_hysteresis_threshold(rotated_zdv, bkgd, np.max(rotated_zdv)-1)
+    # rotated_zdv = filters.apply_hysteresis_threshold(rotated_zdv, bkgd, np.max(rotated_zdv)-1)
 
     blank = np.zeros(rotated_zdv.shape, dtype=bool)
     sideA = blank.copy()
@@ -155,24 +156,44 @@ def orient(zplane, rotation_axis, flip):
         rotated= np.fliplr(rotated)
     return rotated
 
+def orient_mask(zshape, rotation_axis, flip, bkgd=200):
+    rotated = ndimage.rotate(zshape, rotation_axis, reshape=True)
+    if flip:
+        rotated= np.fliplr(rotated)
+    
+    rotated = exposure.adjust_gamma(rotated)
+    rotated = filters.apply_hysteresis_threshold(rotated, bkgd, np.max(rotated)-1)
+    rotated = morphology.binary_closing(rotated)
+    rotated = canny(rotated, sigma=2.0, low_threshold=0.55, high_threshold=0.8) 
+    rotated = morphology.binary_dilation(rotated) # fills a hole in edges
+    structure = np.ones((3, 3))
+    rotated = ndimage.binary_fill_holes(rotated, structure)
+
+    emb_regions = regionprops(rotated.astype(np.uint8))
+    areas = [emb['area'] for emb in emb_regions]
+    props = emb_regions[np.argmax(areas)]
+
+    y0, x0 = props.centroid
+    orientation = props.orientation
+    ys = [y0]
+    xs = [x0]
+    xs.append(x0 + math.cos(orientation) * 0.5 * props.minor_axis_length) #top
+    ys.append(y0 - math.sin(orientation) * 0.5 * props.minor_axis_length)
+    xs.append(x0 - math.sin(orientation) * 0.5 * props.major_axis_length)
+    ys.append(y0 - math.cos(orientation) * 0.5 * props.major_axis_length)
+    xs.append(x0 - math.cos(orientation) * 0.5 * props.minor_axis_length) #bottom
+    ys.append(y0 + math.sin(orientation) * 0.5 * props.minor_axis_length)            
+    xs.append(x0 + math.sin(orientation) * 0.5 * props.major_axis_length)
+    ys.append(y0 + math.cos(orientation) * 0.5 * props.major_axis_length)
+
+    return rotated, xs, ys
+
 def make_qc_figs(imgs, traces, save_name=None):
-    fig, axs = plt.subplots(2 + len(traces), 2, figsize=(10, 10 + 5*len(traces)))
-    axs[0,0].imshow(imgs['emb_mask'], cmap=plt.cm.gray)
-    axs[0,0].set_title('Embryo Mask')
-    axs[0,0].set_xticks([])
-    axs[0,0].set_yticks([])
-    axs[0,1].imshow(imgs['dv_divide'], cmap=plt.cm.gray)
-    axs[0,1].set_title('Dorsal/Ventral Masks')
-    axs[0,1].set_xticks([])
-    axs[0,1].set_yticks([])
-    axs[1,0].imshow(imgs['dorsal_check'], cmap=plt.cm.gray)
-    axs[1,0].set_title('Dorsal Check')
-    axs[1,0].set_xticks([])
-    axs[1,0].set_yticks([])
-    axs[1,1].imshow(imgs['ventral_check'], cmap=plt.cm.gray)
-    axs[1,1].set_title('Ventral Check')
-    axs[1,1].set_xticks([])
-    axs[1,1].set_yticks([])
+    fig, axs = plt.subplots(2 + len(traces), 2, figsize=(20, 20 + 10*len(traces)))
+    imshow(imgs['emb_mask'], axs[0,0], 'Embryo Mask')
+    imshow(imgs['dv_divide'], axs[0,1], 'Dorsal/Ventral Masks')
+    imshow(imgs['dorsal_check'], axs[1,0], 'Dorsal Check')
+    imshow(imgs['ventral_check'], axs[1,1], 'Ventral Check')
     for i, (channel, channel_traces) in enumerate(traces.items()):
         mean = np.array(channel_traces).mean(0)
         error = np.array(channel_traces).std(0)
@@ -180,13 +201,9 @@ def make_qc_figs(imgs, traces, save_name=None):
         axs[2+i, 0].plot(mean)
         axs[2+i, 0].set_title(f'{channel} Mean Trace (w/ Std)')
 
-        axs[2+i, 1].imshow(imgs[channel][1], cmap=plt.cm.gray)
-        axs[2+i, 1].set_title(f'{channel} Check')
-        axs[2+i, 1].set_xticks([])
-        axs[2+i, 1].set_yticks([])
+        imshow(imgs[channel][1], axs[2+i, 1], f'{channel} Check')
     if save_name is not None:
         fig.savefig(save_name)
-
 
 def format_trace_datastructure(trace_sets, excluded=None):
     datastructure = {}
