@@ -154,8 +154,13 @@ def show_orientation(zshape, rotated_AP, xs, ys, filename=None, path=None):
         #time to save
     if filename is not None:
         if path is not None:
-            os.makedirs(path[:-4], exist_ok=True)
-            fig.savefig(os.path.join(path[:-4], f"{filename[:-4]}_APcheck"))
+            if path[-4:] == '.czi':
+                os.makedirs(path[:-4], exist_ok=True)
+                filepath = f"{path[:-4]}_APcheck"
+            else:
+                os.makedirs(path, exist_ok=True)
+                filepath = os.path.join(path, f"{filename[:-4]}_APcheck")
+            fig.savefig(filepath)
         else:
             fig.savefig(f"{filename[:-4]}_APcheck")
     return fig

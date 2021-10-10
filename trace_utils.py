@@ -2,6 +2,7 @@ from imgproc_utils import *
 import csv
 from skimage.feature import canny
 import scipy.stats as stats
+import json
 
 def load_csv_database(filename):
     with open(filename, newline='') as csvfile:
@@ -13,6 +14,7 @@ def load_csv_database(filename):
 
 
 def get_all_traces(database, data_channel_list, channel_dict, channel_list, work_dir, dv_channel, z_offset=3, save=False):
+    save_name = None
     all_traces = {}
     for filename, info in database.items(): #for each file in the database
         this_dict = {}
@@ -26,12 +28,14 @@ def get_all_traces(database, data_channel_list, channel_dict, channel_list, work
         data, _ = load_data(path, channel_dict, channel_list)
         #start getting traces
         this_dict['traces'], qc_imgs = get_traces(data, data_channel_list, flip, thresh_method, dv_channel, z_offset)
-        make_qc_figs(qc_imgs, this_dict['traces'], save)
-        ...
-        #save figures
-        
+        if save:
+            save_name = f'{path[:-4]}_qcFig'
+        make_qc_figs(qc_imgs, this_dict['traces'], save_name)
         all_traces[filename] = this_dict
-    ...
+    if save:
+        with open("all_traces.json", "w") as outfile:
+            json.dump(all_traces, outfile)
+    return all_traces
 
 
 def get_traces(data,
