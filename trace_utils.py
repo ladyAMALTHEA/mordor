@@ -92,8 +92,10 @@ def get_trace(zplane, dorsal_mask, length=100):
 def make_mask(zshape, xs, ys):
     structure = np.ones((3, 3))
     im_filled = ndimage.binary_fill_holes(zshape, structure)
+    footprint = morphology.disk(3) #dilate im_filled by 2-5 pixels
+    im_filled = morphology.binary_dilation(im_filled, footprint)
     edge_mask = canny(im_filled)
-    footprint = morphology.disk(25)
+    footprint = morphology.disk(30) #change this to 30 instead of 25
     edge_mask = morphology.binary_dilation(edge_mask, footprint)
     knife = make_knife(zshape.shape, xs, ys)
     zorro = im_filled*edge_mask # slices off all the extra in edge_mask to make a mask of the area of interest in the embryo

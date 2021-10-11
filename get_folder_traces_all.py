@@ -1,3 +1,4 @@
+##BCD_Kr
 import sys
 sys.path.append('/home/of12/imgproc/scripts')
 from imgproc_utils import *
@@ -15,7 +16,179 @@ ap_channel = 'DAPI'
 dv_channel = 'kr'
 z_offset = 3
 
-database = load_csv_database(csv_file)
+database = load_csv_database(os.path.join(work_dir, csv_file))
+all_traces = get_all_traces(database, 
+                            data_channel_list, 
+                            channel_dict, 
+                            channel_list, 
+                            work_dir, 
+                            dv_channel, 
+                            z_offset, 
+                            save=True)
+
+##gt_hb
+import sys
+sys.path.append('/home/of12/imgproc/scripts')
+from imgproc_utils import *
+from typing import cast
+from trace_utils import *
+
+csv_file = 'settings_gthb.csv'
+work_dir = '/n/scratch3/users/o/of12/images/gt_hb'
+# Gt 488, Pho 546, Snail/Hb 647
+channel_dict = {'DAPI': 0, 'TL':1, 'gt':2, 'pho':3, 'hb':4}
+channel_list = ['DAPI', 'gt', 'pho', 'hb'] #keep for iteration
+data_channel_list = ['gt', 'hb', 'pho']
+shape_channel = 'DAPI'
+ap_channel = 'DAPI'
+dv_channel = 'hb'
+z_offset = 3
+
+database = load_csv_database(os.path.join(work_dir, csv_file))
+all_traces = get_all_traces(database, 
+                            data_channel_list, 
+                            channel_dict, 
+                            channel_list, 
+                            work_dir, 
+                            dv_channel, 
+                            z_offset, 
+                            save=True)
+
+
+##kr_slp_wt
+import sys
+sys.path.append('/home/of12/imgproc/scripts')
+from imgproc_utils import *
+from typing import cast
+from trace_utils import *
+
+csv_file = 'settings_krslp_wt.csv'
+work_dir = '/n/scratch3/users/o/of12/images/kr_slp_wt'
+# Slp-1 488, Pho 546, Snail 594, Kr 647
+channel_dict = {'DAPI': 0, 'TL':1, 'slp':2, 'pho':3, 'snail':4, 'kr':5}
+channel_list = ['DAPI', 'slp', 'pho', 'snail', 'kr'] #keep for iteration
+data_channel_list = ['slp', 'kr', 'pho']
+shape_channel = 'DAPI'
+ap_channel = 'DAPI'
+dv_channel = 'snail'
+z_offset = 3
+
+database = load_csv_database(os.path.join(work_dir, csv_file))
+all_traces = get_all_traces(database, 
+                            data_channel_list, 
+                            channel_dict, 
+                            channel_list, 
+                            work_dir, 
+                            dv_channel, 
+                            z_offset, 
+                            save=True)
+
+
+##kr_slp_pho
+import sys
+sys.path.append('/home/of12/imgproc/scripts')
+from imgproc_utils import *
+from typing import cast
+from trace_utils import *
+
+csv_file = 'settings_krslp_pho.csv'
+work_dir = '/n/scratch3/users/o/of12/images/kr_slp_pho'
+# Slp-1 488, Pho 546, Snail 594, Kr 647
+channel_dict = {'DAPI': 0, 'slp':1, 'pho':2, 'snail':3, 'kr':4,}
+channel_list = ['DAPI', 'slp', 'pho', 'snail', 'kr'] #keep for iteration
+data_channel_list = ['slp', 'kr', 'pho']
+shape_channel = 'DAPI'
+ap_channel = 'DAPI'
+dv_channel = 'snail'
+z_offset = 3
+
+database = load_csv_database(os.path.join(work_dir, csv_file))
+all_traces = get_all_traces(database, 
+                            data_channel_list, 
+                            channel_dict, 
+                            channel_list, 
+                            work_dir, 
+                            dv_channel, 
+                            z_offset, 
+                            save=True)
+
+
+##psc
+import sys
+sys.path.append('/home/of12/imgproc/scripts')
+from imgproc_utils import *
+from typing import cast
+from trace_utils import *
+
+csv_file = 'settings_psc.csv'
+work_dir = '/n/scratch3/users/o/of12/images/psc'
+# Gt 488, Psc 546, Kr/Snail 647
+channel_dict = {'DAPI': 0, 'TL':1, 'gt':2, 'psc':3, 'kr':4}
+channel_list = ['DAPI', 'gt', 'psc', 'kr'] #keep for iteration
+data_channel_list = ['gt', 'kr', 'pho']
+shape_channel = 'DAPI'
+ap_channel = 'DAPI'
+dv_channel = 'kr'
+z_offset = 3
+
+database = load_csv_database(os.path.join(work_dir, csv_file))
+all_traces = get_all_traces(database, 
+                            data_channel_list, 
+                            channel_dict, 
+                            channel_list, 
+                            work_dir, 
+                            dv_channel, 
+                            z_offset, 
+                            save=True)
+
+
+##sfmbt
+import sys
+sys.path.append('/home/of12/imgproc/scripts')
+from imgproc_utils import *
+from typing import cast
+from trace_utils import *
+
+csv_file = 'settings_sfmbt.csv'
+work_dir = '/n/scratch3/users/o/of12/images/sfmbt'
+# Gt 488, Sfmbt 546, Kr/Snail 647
+channel_dict = {'DAPI': 0, 'TL':1, 'gt':2, 'sfmbt':3, 'kr':4}
+channel_list = ['DAPI', 'gt', 'sfmbt', 'kr'] #keep for iteration
+data_channel_list = ['gt', 'kr', 'pho']
+shape_channel = 'DAPI'
+ap_channel = 'DAPI'
+dv_channel = 'kr'
+z_offset = 3
+
+database = load_csv_database(os.path.join(work_dir, csv_file))
+all_traces = get_all_traces(database, 
+                            data_channel_list, 
+                            channel_dict, 
+                            channel_list, 
+                            work_dir, 
+                            dv_channel, 
+                            z_offset, 
+                            save=True)
+
+##ez
+import sys
+sys.path.append('/home/of12/imgproc/scripts')
+from imgproc_utils import *
+from typing import cast
+from trace_utils import *
+
+csv_file = 'settings_ez.csv'
+work_dir = '/n/scratch3/users/o/of12/images/ez'
+# Gt 488, Ez 546, Kr/Snail 647
+channel_dict = {'DAPI': 0, 'TL':1, 'gt':2, 'ez':3, 'kr':4}
+channel_list = ['DAPI', 'gt', 'ez', 'kr'] #keep for iteration
+data_channel_list = ['gt', 'kr', 'pho']
+shape_channel = 'DAPI'
+ap_channel = 'DAPI'
+dv_channel = 'kr'
+z_offset = 3
+
+database = load_csv_database(os.path.join(work_dir, csv_file))
 all_traces = get_all_traces(database, 
                             data_channel_list, 
                             channel_dict, 
