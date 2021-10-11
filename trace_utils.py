@@ -2,7 +2,6 @@ from imgproc_utils import *
 import csv
 from skimage.feature import canny
 import scipy.stats as stats
-import json
 
 def load_csv_database(filename):
     with open(filename, newline='', encoding='utf-8-sig') as csvfile:
@@ -33,8 +32,8 @@ def get_all_traces(database, data_channel_list, channel_dict, channel_list, work
             make_qc_figs(qc_imgs, this_dict['traces'], save_name)
         all_traces[filename] = this_dict
     if save:
-        with open(os.path.join(work_dir, "all_traces.json"), "w") as outfile:
-            json.dump(all_traces, outfile)
+        outfile = os.path.join(work_dir, "all_traces.npy")
+        np.save(outfile, all_traces)
     return all_traces
 
 
@@ -208,6 +207,15 @@ def make_qc_figs(imgs, traces, save_name=None):
     if save_name is not None:
         fig.savefig(save_name)
 
+def load_traces(filename):
+    pickled = np.load(filename, allow_pickle=True)
+    pickled = pickled[()] # don't ask me why, pickles are weird
+    for file in pickled.keys():
+        for gene, trace_list in pickled[file]['traces'].items():
+            pickled[file]['traces'][gene] = np.array(trace_list)
+    return pickled
+
+
 def format_trace_datastructure(trace_sets, excluded=None):
     datastructure = {}
     for trace_set in trace_sets:
@@ -229,3 +237,23 @@ def imshow(img, ax, title):
     ax.set_title(title)
     ax.set_xticks([])
     ax.set_yticks([])
+
+def show_all_traces(all_traces, genes=None):
+    if genes is None:
+        genes = []
+        for genotype, channels in all_traces.items():
+            genes.append(list(channels.keys()))
+    
+    fig, axs = plt.subplots(len(genes), 1, figsize=(10, 10*len(genes)))
+    for ax, gene in zip(axs, genes):
+        for genotype, channels in all_traces.items():
+            traces = channels[gene]
+            mean_traces = traces.mean(1)
+            mean = mean_traces.mean(0)
+            error = mean_traces.std(0)
+            ax.fill_between(np.arange(mean.shape[0]), mean-error, mean+error, alpha=0.5, linewidth=0)
+            ax.plot(mean, label=genotype)
+            ax.set_title(f'{gene} Mean Traces (w/ Std)')
+            ax.legend()
+    
+    return fig
