@@ -1,0 +1,36 @@
+#BCD_Kr
+
+excluded = ['pho_20210929_BCDKr_3.cz', 'wt_20210920_BCDKr_17.czi', 'wt_20210920_BCDKr_18.czi']
+
+#gt_hb
+excluded = ['pho_20210427_gthb_2.czi', 'wt_20210413_gthb_1.czi', 'wt_20210413_gthb_2.czi', 'wt_20210413_gthb_7.czi', 'wt_20210413_gthb_10.czi', 'wt_20210413_gthb_11.czi', 'wt_20210413_gthb_12.czi', 'wt_20210413_gthb_14.czi', 'wt_20210413_gthb_16.czi', 'wt_20210413_gthb_22.czi', 'wt_20210413_gthb_24.czi', 'wt_20210413_gthb_27.czi'
+
+
+#Kr_slp
+
+excluded = ['pho_20210715_krslp_15.czi', 'pho_20210715_krslp_17.czi', 'wt_20210706_krslp_1.czi', 'wt_20210706_krslp_6.czi', 'wt_20210706_krslp_7.czi', 'wt_20210706_krslp_11.czi']
+
+#psc
+excluded = ['psc_20210927_krgt_12.czi', psc_20210927_krgt_17.czi']
+
+
+#sfmbt
+
+excluded = ['sfmbt_20210926_1.czi', 'sfmbt_20210926_4.czi', 'sfmbt_20210926_5.czi', 'sfmbt_20210926_6.czi', 'sfmbt_20210926_11.czi', 'sfmbt_20210926_12.czi', 'sfmbt_20210926_14.czi']
+
+
+
+#ez
+excluded = ['ez_20210924_gtkr_1.czi', 'ez_20210924_gtkr_5.czi', 'ez_20210924_gtkr_7.czi', 'ez_20210924_gtkr_22.czi', 'ez_20210924_gtkr_25.czi']
+
+
+fixes for next time:
+pho_20210929_gt_2.czi was flipped wrong
+wt_20210706_krslp_1.czi flipped wrong
+wt_20210706_krslp_11.czi flipped wrong
+
+also go through the omero files for gt_hb and exclude based on which literally don't show snail. 
+
+notes on thresholds and DV check: 
+1. Often cutting off in the inside of the embryo- sometimes in the middle. This will need to be optimized post DAC. I would likely do significant dilation of the edge followed by a small erosion?
+2. Use dv_channel max for the dv_check since snail signal isn't always clear. 

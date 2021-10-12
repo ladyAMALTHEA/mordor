@@ -2,6 +2,8 @@ from imgproc_utils import *
 import csv
 from skimage.feature import canny
 import scipy.stats as stats
+from distinctipy import distinctipy
+from matplotlib.colors import to_hex, to_rgb
 
 def load_csv_database(filename):
     with open(filename, newline='', encoding='utf-8-sig') as csvfile:
@@ -198,7 +200,7 @@ def make_qc_figs(imgs, traces, save_name=None):
     for i, (channel, channel_traces) in enumerate(traces.items()):
         #plot mean traces
         mean = np.array(channel_traces).mean(0)
-        error = np.array(channel_traces).std(0)
+        error = np.array(channel_traces).std(0) / np.array(channel_traces).shape[0]
         axs[2+i, 0].fill_between(np.arange(mean.shape[0]), mean-error, mean+error, alpha=0.5, linewidth=0)
         axs[2+i, 0].plot(mean)
         axs[2+i, 0].set_title(f'{channel} Mean Trace (w/ Std)')
@@ -226,10 +228,11 @@ def format_trace_datastructure(trace_sets, excluded=None):
             if genotype not in datastructure.keys():
                 datastructure[genotype] = {}
             for gene, traces in file_data['traces'].items():
+                this_array = np.expand_dims(np.array(traces), 0) # [embryo, z_plane, trace] -> i.e. [# of embryos, 3, 100]
                 if gene not in datastructure[genotype].keys():
-                    datastructure[genotype][gene] = np.expand_dims(np.array(traces), 0) # [embryo, z_plane, trace] -> i.e. [# of embryos, 3, 100]
+                    datastructure[genotype][gene] = this_array
                 else:
-                    datastructure[genotype][gene] = np.append(datastructure[genotype][gene], np.array(traces), 0)
+                    datastructure[genotype][gene] = np.append(datastructure[genotype][gene], this_array, 0)
     return datastructure
 
 def imshow(img, ax, title):
@@ -238,22 +241,52 @@ def imshow(img, ax, title):
     ax.set_xticks([])
     ax.set_yticks([])
 
-def show_all_traces(all_traces, genes=None):
+def show_all_traces(all_traces, genotypes=None, genes=None):
+    if genotypes is None:
+        genotypes = list(all_traces.keys())
+    
     if genes is None:
         genes = []
-        for genotype, channels in all_traces.items():
-            genes.append(list(channels.keys()))
+        for genotype in genotypes:
+            genes += list(all_traces[genotype].keys())
+        genes = list(set(genes))
+
+    color_dict = get_color_dict(genotypes)
     
     fig, axs = plt.subplots(len(genes), 1, figsize=(10, 10*len(genes)))
     for ax, gene in zip(axs, genes):
-        for genotype, channels in all_traces.items():
-            traces = channels[gene]
-            mean_traces = traces.mean(1)
-            mean = mean_traces.mean(0)
-            error = mean_traces.std(0)
-            ax.fill_between(np.arange(mean.shape[0]), mean-error, mean+error, alpha=0.5, linewidth=0)
-            ax.plot(mean, label=genotype)
+        for genotype in genotypes:
+            if gene not in all_traces[genotype].keys():
+                continue
+            traces = all_traces[genotype][gene]
+            mean_traces = np.nanmean(traces, 1)
+            mean = np.nanmean(mean_traces, 0)
+            error = np.nanstd(mean_traces, 0) / mean_traces.shape[0]
+            ax.fill_between(np.arange(mean.shape[0]), mean-error, mean+error, alpha=0.5, linewidth=0, color=color_dict[genotype])
+            ax.plot(mean, label=genotype, color=color_dict[genotype])
             ax.set_title(f'{gene} Mean Traces (w/ Std)')
             ax.legend()
     
     return fig
+
+def get_color_dict(genotypes):
+    color_dict = {}
+    genotypes = genotypes.copy()
+    if 'wt' in genotypes:
+        color_dict['wt'] = '#000000'
+        genotypes.remove('wt')
+
+    if 'pho' in genotypes:
+        color_dict['pho'] = '#B90E0A'
+        genotypes.remove('pho')
+    
+    exclude = list(to_rgb(color) for color in color_dict.values())
+    exclude.append(to_rgb('#ffffff'))
+
+    colors = distinctipy.get_colors(len(genotypes), 
+                                    exclude, 
+                                    colorblind_type="Deuteranomaly")
+    for color, genotype in zip(colors, genotypes):
+        color_dict[genotype] = to_hex(color)
+    
+    return color_dict
