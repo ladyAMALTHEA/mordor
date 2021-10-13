@@ -3,7 +3,8 @@ import csv
 from skimage.feature import canny
 import scipy.stats as stats
 from distinctipy import distinctipy
-from matplotlib.colors import to_hex, to_rgb
+from matplotlib.colors import to_hex, to_rgb 
+plt.rcParams['svg.fonttype'] = 'none'
 
 def load_csv_database(filename):
     with open(filename, newline='', encoding='utf-8-sig') as csvfile:
@@ -222,17 +223,19 @@ def format_trace_datastructure(trace_sets, excluded=None):
     datastructure = {}
     for trace_set in trace_sets:
         for filename, file_data in trace_set.items():
-            if excluded is not None and filename in excluded:
+            if excluded is not None and filename in excluded or f'{filename}.czi' in excluded:
+                # print(f'{filename} excluded.')
                 continue
-            genotype = file_data['genotype']
-            if genotype not in datastructure.keys():
-                datastructure[genotype] = {}
-            for gene, traces in file_data['traces'].items():
-                this_array = np.expand_dims(np.array(traces), 0) # [embryo, z_plane, trace] -> i.e. [# of embryos, 3, 100]
-                if gene not in datastructure[genotype].keys():
-                    datastructure[genotype][gene] = this_array
-                else:
-                    datastructure[genotype][gene] = np.append(datastructure[genotype][gene], this_array, 0)
+            else:
+                genotype = file_data['genotype']
+                if genotype not in datastructure.keys():
+                    datastructure[genotype] = {}
+                for gene, traces in file_data['traces'].items():
+                    this_array = np.expand_dims(np.array(traces), 0) # [embryo, z_plane, trace] -> i.e. [# of embryos, 3, 100]
+                    if gene not in datastructure[genotype].keys():
+                        datastructure[genotype][gene] = this_array
+                    else:
+                        datastructure[genotype][gene] = np.append(datastructure[genotype][gene], this_array, 0)
     return datastructure
 
 def imshow(img, ax, title):
@@ -241,7 +244,7 @@ def imshow(img, ax, title):
     ax.set_xticks([])
     ax.set_yticks([])
 
-def show_all_traces(all_traces, genotypes=None, genes=None):
+def show_all_traces(all_traces, genotypes=None, genes=None, color_dict=None):
     if genotypes is None:
         genotypes = list(all_traces.keys())
     
@@ -251,7 +254,8 @@ def show_all_traces(all_traces, genotypes=None, genes=None):
             genes += list(all_traces[genotype].keys())
         genes = list(set(genes))
 
-    color_dict = get_color_dict(genotypes)
+    if color_dict is None:
+        color_dict = get_color_dict(genotypes)
     
     fig, axs = plt.subplots(len(genes), 1, figsize=(10, 10*len(genes)))
     for ax, gene in zip(axs, genes):
@@ -260,10 +264,11 @@ def show_all_traces(all_traces, genotypes=None, genes=None):
                 continue
             traces = all_traces[genotype][gene]
             mean_traces = np.nanmean(traces, 1)
+            n = mean_traces.shape[0]
             mean = np.nanmean(mean_traces, 0)
             error = np.nanstd(mean_traces, 0) / mean_traces.shape[0]
             ax.fill_between(np.arange(mean.shape[0]), mean-error, mean+error, alpha=0.5, linewidth=0, color=color_dict[genotype])
-            ax.plot(mean, label=genotype, color=color_dict[genotype])
+            ax.plot(mean, label=f'{genotype} (n = {n})', color=color_dict[genotype])
             ax.set_title(f'{gene} Mean Traces (w/ Std)')
             ax.legend()
     
