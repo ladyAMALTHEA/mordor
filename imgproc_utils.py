@@ -105,6 +105,9 @@ def get_thresholded(data, method='OHTSU', shape_channel='DAPI', z_plane=None, bk
         zshape = morphology.binary_dilation(zshape, footprint)
         zshape = morphology.binary_closing(zshape)
         zshape = morphology.binary_erosion(zshape, footprint)
+    else:
+        #load custom mask from filename in "method" variable
+
 
     return zshape
 
