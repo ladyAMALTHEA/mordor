@@ -25,6 +25,10 @@ def get_all_traces(database, data_channel_list, channel_dict, channel_list, work
         this_dict['genotype'] = info['genotype']
         thresh_method = info['thresh_method']
         flip = info['flip'].upper() == 'TRUE'
+        if 'bellyup' in info:
+            sideA_ventral = info['bellyup'].upper() == 'TRUE'
+        else:
+            sideA_ventral = None
         #load the data
         path = os.path.join(work_dir, filename) + '.czi'
         data, _ = load_data(path, channel_dict, channel_list)
@@ -123,7 +127,7 @@ def make_knife(dims, xs, ys):
     major_axis_knife = morphology.binary_dilation(major_axis_line, footprint)
     return major_axis_knife
     
-def get_dv(dv_divide, rotated_zdv, bkgd=200):
+def get_dv(dv_divide, rotated_zdv, bkgd=200, sideA_ventral=None):
     dv_label = label(dv_divide)
     dv_regions = regionprops(dv_label)
 
@@ -144,11 +148,15 @@ def get_dv(dv_divide, rotated_zdv, bkgd=200):
     decide_B =  rotated_zdv*sideB
 
     # decision point for the DV axis
-    if np.sum(decide_A) > np.sum(decide_B):
+    # is the embryo belly-up? Then sideA is ventral
+    if sideA_ventral is None:
+       sideA_ventral = np.sum(decide_A) > np.sum(decide_B)
+
+    if sideA_ventral: #belly = TRUE
         dorsal_mask = sideB
         dorsal = decide_B
         ventral = decide_A
-    else:
+    else: #belly = FALSE
         dorsal_mask = sideA
         dorsal = decide_A
         ventral = decide_B
@@ -284,6 +292,7 @@ def get_color_dict(genotypes):
     if 'pho' in genotypes:
         color_dict['pho'] = '#B90E0A'
         genotypes.remove('pho')
+
     
     exclude = list(to_rgb(color) for color in color_dict.values())
     exclude.append(to_rgb('#ffffff'))
