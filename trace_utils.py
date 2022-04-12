@@ -25,7 +25,7 @@ def get_all_traces(database, data_channel_list, channel_dict, channel_list, work
         this_dict['genotype'] = info['genotype']
         thresh_method = info['thresh_method']
         flip = info['flip'].upper() == 'TRUE'
-        if 'bellyup' in info:
+        if 'bellyup' in info and info['bellyup'].upper() != 'NONE':
             sideA_ventral = info['bellyup'].upper() == 'TRUE'
         else:
             sideA_ventral = None
