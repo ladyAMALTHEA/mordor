@@ -207,7 +207,7 @@ from trace_utils import *
 
 csv_file = 'settings_esc.csv'
 work_dir = '/n/groups/depace/of12/images/esc'
-# Gt 488, Ez 546, Kr/Snail 647
+# Gt 488, Kr/Snail 546, Hb 647
 channel_dict = {'DAPI': 0, 'TL':1, 'gt':2, 'kr':3, 'hb':4}
 channel_list = ['DAPI', 'gt', 'kr', 'hb'] #keep for iteration
 data_channel_list = ['gt', 'kr', 'hb']
@@ -236,6 +236,35 @@ from trace_utils import *
 
 csv_file = 'settings_CAD.csv'
 work_dir = '/n/groups/depace/of12/images/CAD_gt'
+# Gt 488, Ez 546, Kr/Snail 647
+channel_dict = {'DAPI': 0, 'TL':1, 'CAD':2, 'pho':3, 'gt':4}
+channel_list = ['DAPI', 'CAD', 'pho', 'gt'] #keep for iteration
+data_channel_list = ['gt', 'CAD', 'pho']
+shape_channel = 'DAPI'
+ap_channel = 'DAPI'
+dv_channel = 'gt'
+z_offset = 3
+
+database = load_csv_database(os.path.join(work_dir, csv_file))
+all_traces = get_all_traces(database, 
+                            data_channel_list, 
+                            channel_dict, 
+                            channel_list, 
+                            work_dir, 
+                            dv_channel, 
+                            z_offset, 
+                            save=True)
+
+
+##CAD_wt
+import sys
+sys.path.append('/home/of12/imgproc/scripts')
+from imgproc_utils import *
+from typing import cast
+from trace_utils import *
+
+csv_file = 'settings_CAD_wt.csv'
+work_dir = '/n/groups/depace/of12/images/CAD_gt/wt_CAD'
 # Gt 488, Ez 546, Kr/Snail 647
 channel_dict = {'DAPI': 0, 'TL':1, 'CAD':2, 'pho':3, 'gt':4}
 channel_list = ['DAPI', 'CAD', 'pho', 'gt'] #keep for iteration

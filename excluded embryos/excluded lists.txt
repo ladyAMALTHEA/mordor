@@ -23,6 +23,13 @@ excluded = ['sfmbt_20210926_1.czi', 'sfmbt_20210926_4.czi', 'sfmbt_20210926_5.cz
 #ez
 excluded = ['ez_20210924_gtkr_1.czi', 'ez_20210924_gtkr_5.czi', 'ez_20210924_gtkr_7.czi', 'ez_20210924_gtkr_22.czi', 'ez_20210924_gtkr_25.czi']
 
+#esc
+excluded = ['esc_20220405_27.czi']
+
+#CAD
+# none excluded for pho
+excluded = ['
+
 
 fixes for next time:
 pho_20210929_gt_2.czi was flipped wrong

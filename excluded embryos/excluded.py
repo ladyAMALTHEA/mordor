@@ -34,7 +34,14 @@ thresh_excluded = ['pho_20210929_BCDKr_3.czi',
                 'ez_20210924_gtkr_5.czi', 
                 'ez_20210924_gtkr_7.czi', 
                 'ez_20210924_gtkr_22.czi', 
-                'ez_20210924_gtkr_25.czi']
+                'ez_20210924_gtkr_25.czi',
+                'esc_20220405_1.czi',
+                'esc_20220405_3.czi',
+                'esc_20220405_9.czi',
+                'esc_20220405_26.czi',
+                'esc_20220405_27.czi',
+                'esc_20220405_28.czi',
+                'esc_20220405_33.czi']
 
 mitosis_excluded = ['pho_20210427_gthb_10.czi',
                  'pho_20210427_gthb_8.czi',

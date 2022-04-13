@@ -3,7 +3,6 @@ import csv
 from skimage.feature import canny
 import scipy.stats as stats
 
-
 def load_csv_database(filename):
     with open(filename, newline='', encoding='utf-8-sig') as csvfile:
         reader = csv.DictReader(csvfile)
@@ -24,9 +23,9 @@ def get_all_traces(database, data_channel_list, channel_dict, channel_list, work
         thresh_method = info['thresh_method']
         flip = info['flip'].upper() == 'TRUE'
         if 'bellyup' in info and info['bellyup'].upper() != 'NONE':
-            sideA_ventral = info['bellyup'].upper() == 'TRUE'
+            decide_A = info['bellyup'].upper() == 'TRUE'
         else:
-            sideA_ventral = None
+            decide_A = None
         #load the data
         path = os.path.join(work_dir, filename) + '.czi'
         data, _ = load_data(path, channel_dict, channel_list)
@@ -99,7 +98,7 @@ def make_mask(zshape, xs, ys):
     footprint = morphology.disk(3) #dilate im_filled by 2-5 pixels
     im_filled = morphology.binary_dilation(im_filled, footprint)
     edge_mask = canny(im_filled)
-    footprint = morphology.disk(30) #change this to 30 instead of 25
+    footprint = morphology.disk(35) #changed again to 35 to see if that would help. #change this to 30 instead of 25
     edge_mask = morphology.binary_dilation(edge_mask, footprint)
     knife = make_knife(zshape.shape, xs, ys)
     zorro = im_filled*edge_mask # slices off all the extra in edge_mask to make a mask of the area of interest in the embryo
@@ -125,7 +124,7 @@ def make_knife(dims, xs, ys):
     major_axis_knife = morphology.binary_dilation(major_axis_line, footprint)
     return major_axis_knife
     
-def get_dv(dv_divide, rotated_zdv, bkgd=200, sideA_ventral=None):
+def get_dv(dv_divide, rotated_zdv, bkgd=200):
     dv_label = label(dv_divide)
     dv_regions = regionprops(dv_label)
 
@@ -146,15 +145,11 @@ def get_dv(dv_divide, rotated_zdv, bkgd=200, sideA_ventral=None):
     decide_B =  rotated_zdv*sideB
 
     # decision point for the DV axis
-    # is the embryo belly-up? Then sideA is ventral
-    if sideA_ventral is None:
-       sideA_ventral = np.sum(decide_A) > np.sum(decide_B)
-
-    if sideA_ventral: #bellyup = TRUE
+    if np.sum(decide_A) > np.sum(decide_B):
         dorsal_mask = sideB
         dorsal = decide_B
         ventral = decide_A
-    else: #bellyup = FALSE
+    else:
         dorsal_mask = sideA
         dorsal = decide_A
         ventral = decide_B
@@ -207,7 +202,7 @@ def make_qc_figs(imgs, traces, save_name=None):
     for i, (channel, channel_traces) in enumerate(traces.items()):
         #plot mean traces
         mean = np.array(channel_traces).mean(0)
-        error = np.array(channel_traces).std(0) / np.array(channel_traces).shape[0]
+        error = np.array(channel_traces).std(0)
         axs[2+i, 0].fill_between(np.arange(mean.shape[0]), mean-error, mean+error, alpha=0.5, linewidth=0)
         axs[2+i, 0].plot(mean)
         axs[2+i, 0].set_title(f'{channel} Mean Trace (w/ Std)')
@@ -230,18 +225,15 @@ def format_trace_datastructure(trace_sets, excluded=None):
     for trace_set in trace_sets:
         for filename, file_data in trace_set.items():
             if excluded is not None and filename in excluded or f'{filename}.czi' in excluded:
-                # print(f'{filename} excluded.')
                 continue
-            else:
-                genotype = file_data['genotype']
-                if genotype not in datastructure.keys():
-                    datastructure[genotype] = {}
-                for gene, traces in file_data['traces'].items():
-                    this_array = np.expand_dims(np.array(traces), 0) # [embryo, z_plane, trace] -> i.e. [# of embryos, 3, 100]
-                    if gene not in datastructure[genotype].keys():
-                        datastructure[genotype][gene] = this_array
-                    else:
-                        datastructure[genotype][gene] = np.append(datastructure[genotype][gene], this_array, 0)
+            genotype = file_data['genotype']
+            if genotype not in datastructure.keys():
+                datastructure[genotype] = {}
+            for gene, traces in file_data['traces'].items():
+                if gene not in datastructure[genotype].keys():
+                    datastructure[genotype][gene] = np.expand_dims(np.array(traces), 0) # [embryo, z_plane, trace] -> i.e. [# of embryos, 3, 100]
+                else:
+                    datastructure[genotype][gene] = np.append(datastructure[genotype][gene], np.array(traces), 0)
     return datastructure
 
 def imshow(img, ax, title):
