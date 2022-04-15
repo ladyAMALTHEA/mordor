@@ -227,19 +227,19 @@ all_traces = get_all_traces(database,
                             save=True)
 
 
-##CAD
+##CAD pho
 import sys
 sys.path.append('/home/of12/imgproc/scripts')
 from imgproc_utils import *
 from typing import cast
 from trace_utils import *
 
-csv_file = 'settings_CAD.csv'
-work_dir = '/n/groups/depace/of12/images/CAD_gt'
+csv_file = 'settings_CAD_pho.csv'
+work_dir = '/n/groups/depace/of12/images/CAD_gt/pho_CAD'
 # Gt 488, Ez 546, Kr/Snail 647
-channel_dict = {'DAPI': 0, 'TL':1, 'CAD':2, 'pho':3, 'gt':4}
+channel_dict = {'DAPI': 0, 'TL':1, 'CAD':3, 'pho':2, 'gt':4}
 channel_list = ['DAPI', 'CAD', 'pho', 'gt'] #keep for iteration
-data_channel_list = ['gt', 'CAD', 'pho']
+data_channel_list = ['CAD', 'pho']
 shape_channel = 'DAPI'
 ap_channel = 'DAPI'
 dv_channel = 'gt'
@@ -266,9 +266,9 @@ from trace_utils import *
 csv_file = 'settings_CAD_wt.csv'
 work_dir = '/n/groups/depace/of12/images/CAD_gt/wt_CAD'
 # Gt 488, Ez 546, Kr/Snail 647
-channel_dict = {'DAPI': 0, 'TL':1, 'CAD':2, 'pho':3, 'gt':4}
+channel_dict = {'DAPI': 0, 'TL':1, 'CAD':3, 'pho':2, 'gt':4}
 channel_list = ['DAPI', 'CAD', 'pho', 'gt'] #keep for iteration
-data_channel_list = ['gt', 'CAD', 'pho']
+data_channel_list = ['CAD', 'pho']
 shape_channel = 'DAPI'
 ap_channel = 'DAPI'
 dv_channel = 'gt'

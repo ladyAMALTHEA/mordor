@@ -31,7 +31,7 @@ def get_all_traces(database, data_channel_list, channel_dict, channel_list, work
         path = os.path.join(work_dir, filename) + '.czi'
         data, _ = load_data(path, channel_dict, channel_list)
         #start getting traces
-        this_dict['traces'], qc_imgs = get_traces(data, flip, data_channel_list, thresh_method, dv_channel, z_offset=z_offset)
+        this_dict['traces'], qc_imgs = get_traces(data, flip, data_channel_list, thresh_method, dv_channel, z_offset=z_offset, sideA_ventral=sideA_ventral)
         if save:
             save_name = f'{path[:-4]}_qcFig'
             make_qc_figs(qc_imgs, this_dict['traces'], save_name)
@@ -51,7 +51,8 @@ def get_traces(data,
             ap_channel='DAPI', 
             z_plane=None, 
             bkgd=200,
-            z_offset=3):
+            z_offset=3,
+            sideA_ventral=None):
     if z_plane is None:
         z_plane = data[shape_channel].shape[0] // 2
     z_planes = [z_plane - z_offset, z_plane, z_plane + z_offset]
@@ -61,7 +62,7 @@ def get_traces(data,
     rot_zshape, rot_xs, rot_ys = orient_mask(zshape, rotation_axis, flip, bkgd)
     dv_divide, im_filled = make_mask(rot_zshape, rot_xs, rot_ys)
     rotated_zdv = orient(data[dv_channel][z_plane,:,:], rotation_axis, flip)
-    dorsal_mask, dorsal, ventral = get_dv(dv_divide, rotated_zdv, bkgd)
+    dorsal_mask, dorsal, ventral = get_dv(dv_divide, rotated_zdv, sideA_ventral)
 
     qc_imgs = {}
     qc_imgs['emb_mask'] = im_filled
@@ -125,12 +126,11 @@ def make_knife(dims, xs, ys):
     major_axis_knife = morphology.binary_dilation(major_axis_line, footprint)
     return major_axis_knife
     
-def get_dv(dv_divide, rotated_zdv, bkgd=200, sideA_ventral=None):
+def get_dv(dv_divide, rotated_zdv, sideA_ventral=None):
     dv_label = label(dv_divide)
     dv_regions = regionprops(dv_label)
 
     rotated_zdv = exposure.adjust_gamma(rotated_zdv) #normalize for better detection
-    # rotated_zdv = filters.apply_hysteresis_threshold(rotated_zdv, bkgd, np.max(rotated_zdv)-1)
 
     blank = np.zeros(rotated_zdv.shape, dtype=bool)
     sideA = blank.copy()
