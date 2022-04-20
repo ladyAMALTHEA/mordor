@@ -105,6 +105,80 @@ def get_thresholded(data, method='OHTSU', shape_channel='DAPI', z_plane=None, bk
         zshape = morphology.binary_dilation(zshape, footprint)
         zshape = morphology.binary_closing(zshape)
         zshape = morphology.binary_erosion(zshape, footprint)
+    elif method.upper() == 'LIV_1':
+        # LIV_1 THRESHOLDING
+        footprint=morphology.disk(25)
+        zshape = data[shape_channel].astype(float).std(0)
+        # zshape = data[shape_channel].astype(float).max(0)    
+        zshape -= zshape.min()
+        zshape[zshape < 0] = 0
+         # Normalize to range of [-1, 1]
+        zshape /= (zshape.max() / 2)
+        zshape -= 1
+        zshape = exposure.equalize_hist(zshape)
+        zshape = exposure.equalize_adapthist(zshape)
+        zshape -= filters.threshold_otsu(zshape)
+        zshape[zshape < 0] = 0
+        bkgd = filters.threshold_otsu(np.nanquantile(zshape.flatten(), 0.7))
+        max_signal = np.nanquantile(zshape.flatten(), 0.99)
+        zshape = filters.apply_hysteresis_threshold(zshape, bkgd, max_signal)
+        zshape = filters.threshold_sauvola(zshape)
+
+        zshape = morphology.binary_closing(zshape)
+        zshape = morphology.binary_dilation(zshape, footprint)
+        zshape = morphology.binary_closing(zshape)
+        zshape = morphology.binary_erosion(zshape, footprint)
+        zshape = ndimage.binary_fill_holes(zshape)#, structure)
+        
+    elif method.upper() == 'LIV_2':
+            # LIV_2 THRESHOLD
+            footprint=morphology.disk(25)
+            zshape = data[shape_channel].astype(float).std(0)
+            zshape -= zshape.min()
+            zshape[zshape < 0] = 0
+            # Normalize to range of [-1, 1]
+            zshape /= (zshape.max() / 2)
+            zshape -= 1
+            zshape = exposure.equalize_hist(zshape)
+            zshape = exposure.equalize_adapthist(zshape)
+            zshape -= filters.threshold_otsu(zshape)
+            zshape[zshape < 0] = 0
+            zshape = filters.threshold_sauvola(zshape, window_size=27) # different sauvola than LIV_1 and put above hystersis
+            bkgd = filters.threshold_otsu(np.nanquantile(zshape.flatten(), 0.7))        
+            max_signal = np.nanquantile(zshape.flatten(), 0.99)
+            zshape = filters.apply_hysteresis_threshold(zshape, bkgd, max_signal)
+            zshape = morphology.binary_closing(zshape)
+            zshape = morphology.binary_dilation(zshape, footprint)
+            zshape = morphology.binary_closing(zshape)
+            zshape = morphology.binary_erosion(zshape, footprint)
+            zshape = ndimage.binary_fill_holes(zshape)#, structure)
+        
+    elif method.upper() == 'LIV_3':
+            # LIV_3 THRESHOLD
+            footprint=morphology.disk(25)
+            zshape = data[shape_channel].astype(float).std(0)
+            zshape -= zshape.min()
+            zshape[zshape < 0] = 0
+            # Normalize to range of [-1, 1]
+            zshape /= (zshape.max() / 2)
+            zshape -= 1
+            zshape = exposure.equalize_hist(zshape)
+            zshape = exposure.equalize_adapthist(zshape)
+
+            zshape -= filters.threshold_otsu(zshape)
+            zshape[zshape < 0] = 0
+
+            zshape = filters.threshold_sauvola(zshape, window_size=33)
+
+            bkgd = filters.threshold_otsu(np.nanquantile(zshape.flatten(), 0.7))        
+            max_signal = np.nanquantile(zshape.flatten(), 0.99)
+            zshape = filters.apply_hysteresis_threshold(zshape, bkgd, max_signal)
+            zshape = filters.threshold_sauvola(zshape, window_size=33) #double sauvola
+            zshape = morphology.binary_closing(zshape)
+            zshape = morphology.binary_dilation(zshape, footprint)
+            zshape = morphology.binary_closing(zshape)
+            zshape = morphology.binary_erosion(zshape, footprint)
+            zshape = ndimage.binary_fill_holes(zshape)#, structure)
     #else:
         #load custom mask from filename in "method" variable
     return zshape
