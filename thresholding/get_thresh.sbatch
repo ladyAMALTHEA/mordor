@@ -3,7 +3,7 @@
 #SBATCH -p priority
 #SBATCH -t 1-00:00
 #SBATCH -c 5
-#SBATCH --mem=5G
+#SBATCH --mem=100G
 #SBATCH -o %j.out
 #SBATCH -e %j.err
 #SBATCH -J get_thresh_all
