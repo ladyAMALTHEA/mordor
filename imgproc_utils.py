@@ -242,7 +242,7 @@ def show_orientation(zshape, rotated_AP, xs, ys, filename=None, path=None):
 
 
 def show_thresh_test(data, 
-                    methods_list=['OHTSU', 'GAMMA', 'DILL', 'JEFE_1', 'JEFE_2', 'JEFE_3'], 
+                    methods_list=['OHTSU', 'GAMMA', 'DILL', 'JEFE_1', 'JEFE_2', 'JEFE_3', 'LIV_1', 'LIV_2', 'LIV_3'], 
                     shape_channel='DAPI', 
                     ap_channel='DAPI', 
                     z_plane=None, 

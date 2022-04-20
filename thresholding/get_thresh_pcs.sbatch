@@ -6,7 +6,7 @@
 #SBATCH --mem=100G
 #SBATCH -o %j.out
 #SBATCH -e %j.err
-#SBATCH -J get_threshAP_v2_all
+#SBATCH -J get_thresh_pcs
 #SBATCH --mail-type=ALL
 #SBATCH --mail-user=ofoster@g.harvard.edu
 
