@@ -10,4 +10,4 @@
 #SBATCH --mail-type=ALL
 #SBATCH --mail-user=ofoster@g.harvard.edu
 
-python ~/imgproc/scripts/img_processing_pcs.py 
+python ~/imgproc/scripts/emb_processing_pcs.py 

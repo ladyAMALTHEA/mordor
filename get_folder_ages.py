@@ -4,7 +4,7 @@ from imgproc_utils import *
 from typing import cast
 from trace_utils import *
 
-def get_age(path, channel_dict, channel_list, age_channel='DAPI'):
+def get_age(path, channel_dict, channel_list, age_channel='DAPI', TL_channel='TL'):
     czi = czifile.imread(path)
     img=czi.squeeze()
 
@@ -23,25 +23,25 @@ def get_age(path, channel_dict, channel_list, age_channel='DAPI'):
     max_projection = data[age_channel].max(0)
     mid_slice =round(img.shape[1] / 2)
     stage_slice = data[age_channel][mid_slice,:,:]
-    TL_stage_slice = data[1][mid_slice,:,:]
+    TL_stage_slice = data[TL_channel][mid_slice,:,:]
     age_zoom_top = max_projection[zoom_y1:zoom_y2,  zoom_x1:zoom_x2]
     age_zoom_mid = stage_slice[zoom_y1:zoom_y2,  zoom_x1:zoom_x2]
     TL_age_zoom_mid = TL_stage_slice[zoom_y1:zoom_y2,  zoom_x1:zoom_x2]
 
 
     #to see images
-    fig = plt.figure(figsize=(50,50))
-    ax=fig.add_subplot(2,3,1)
+    fig = plt.figure(figsize=(75,75))
+    ax=fig.add_subplot(3,2,1)
     plt.imshow(max_projection, cmap='gray', vmin=np.min(max_projection), vmax=np.max(max_projection)-1)
-    ax=fig.add_subplot(2,3,2)
+    ax=fig.add_subplot(3,2,2)
     plt.imshow(stage_slice, cmap='gray', vmin=np.min(stage_slice), vmax=np.max(stage_slice)-1)
-    ax=fig.add_subplot(2,3,3)
+    ax=fig.add_subplot(3,2,3)
     plt.imshow(age_zoom_top, cmap='gray', vmin=np.min(age_zoom_top), vmax=np.max(age_zoom_top)-1)
-    ax=fig.add_subplot(2,3,4)
+    ax=fig.add_subplot(3,2,4)
     plt.imshow(age_zoom_mid, cmap='gray', vmin=np.min(age_zoom_mid), vmax=np.max(age_zoom_mid)-1)
-    ax=fig.add_subplot(2,3,5)
+    ax=fig.add_subplot(3,2,5)
     plt.imshow(TL_stage_slice, cmap='gray', vmin=np.min(TL_stage_slice), vmax=np.max(TL_stage_slice)-1)
-    ax=fig.add_subplot(2,3,6)
+    ax=fig.add_subplot(3,2,6)
     plt.imshow(TL_age_zoom_mid, cmap='gray', vmin=np.min(TL_age_zoom_mid), vmax=np.max(TL_age_zoom_mid)-1)
 
     #time to save
@@ -110,6 +110,12 @@ if __name__ == '__main__':
     channel_dict = {'DAPI': 0, 'TL':1, 'caudal':2, 'pho':3, 'kr':4}
     channel_list = ['DAPI', 'TL', 'kr', 'caudal', 'pho'] #keep for iteration
     get_folder_ages(work_dir, channel_dict, channel_list)
+
+    # work_dir = '/n/groups/depace/of12/images/kni_eve'
+    # # eve 488, pho 555, kni/snail 647
+    # channel_dict = {'DAPI': 0, 'TL':1, 'eve':2, 'pho':3, 'kni':4}
+    # channel_list = ['DAPI', 'TL', 'eve', 'kni', 'pho'] #keep for iteration
+    # get_folder_ages(work_dir, channel_dict, channel_list)
 
     # work_dir = '/n/groups/depace/of12/images/kr_slp1/all_kr_slp'
     # # Slp-1 488, Pho 546, Snail 594, Kr 647
