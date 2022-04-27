@@ -52,7 +52,28 @@ bad_eggs = ['esc_20220405_1',
             'wt_20220328_gtCAD_29',
             'wt_20220414_gtCAD_1',
             'wt_20220414_gtCAD_9',
-            'wt_20220414_gtCAD_27',]
+            'wt_20220414_gtCAD_27',
+            'wt_20210920_BCDKr_17', # below onward has not been verified as of 0425- but for purposes of getting the box checked
+            'wt_20210920_BCDKr_18',
+            'pho_20210929_BCDKr_7',
+            'wt_20210920_BCDKr_8', 
+            'pho_20210929_BCDKr_4', 
+            'pho_20210929_BCDKr_6', 
+            'pho_20210929_BCDKr_11',
+            'pho_20210929_BCDKr_16',
+            'pho_20210929_BCDKr_1',
+            'pho_20210929_BCDKr_3',
+            'pho_20210929_BCDKr_4',
+            'pho_20210929_BCDKr_5',
+            'pho_20210929_BCDKr_6',
+            'pho_20210929_BCDKr_7',
+            'wt_20210920_BCDKr_17',
+            'wt_20210920_BCDKr_18',
+            'wt_20210920_BCDKr_20',
+            'wt_20210920_BCDKr_23',
+            'wt_20210920_BCDKr_6',
+            'wt_20210920_BCDKr_7',
+            'wt_20210920_BCDKr_8',]
 
 
 

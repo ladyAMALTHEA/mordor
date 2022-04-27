@@ -3,7 +3,7 @@
 #SBATCH -p priority
 #SBATCH -t 1-00:00
 #SBATCH -c 5
-#SBATCH --mem=10G
+#SBATCH --mem=50G
 #SBATCH -o %j.out
 #SBATCH -e %j.err
 #SBATCH -J get_ft_all
