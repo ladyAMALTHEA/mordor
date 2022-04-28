@@ -6,6 +6,7 @@ from trace_utils import *
 
 
 if __name__ == '__main__':
+    csv_file = 'settings_krcad.csv'
     work_dir = '/n/groups/depace/of12/images/kr_cad'
     # Snail/Kr 488, BCD 555, Pho 647
     channel_dict = {'DAPI': 0, 'TL':1, 'caudal':2, 'pho':3, 'kr':4}
