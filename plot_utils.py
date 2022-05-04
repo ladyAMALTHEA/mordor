@@ -36,7 +36,7 @@ def show_all_traces(all_traces, genotypes=None, genes=None, color_dict=None, ind
                     ax.plot(trace, alpha=0.5, linewidth=0.5, color=color_dict[genotype])    
                 ax.set_title(f'{gene} Mean Traces (w/ Individuals)')
             else:
-                error = np.nanstd(mean_traces, 0) / mean_traces.shape[0]
+                error = np.nanstd(mean_traces, 0) / np.sqrt(mean_traces.shape[0])
                 ax.fill_between(np.arange(mean.shape[0]), mean-error, mean+error, alpha=0.5, linewidth=0, color=color_dict[genotype])
                 ax.set_title(f'{gene} Mean Traces (w/ Std)')
             
@@ -62,7 +62,7 @@ def show_genotype_traces(all_traces, genotype='wt', genes=None, individuals=Fals
                 ax.plot(trace, alpha=0.5, linewidth=0.5, color=colors[i])
             ax.set_title(f'{gene} Mean Traces (w/ Individuals)')
         else:
-            error = np.nanstd(mean_traces, 0) / mean_traces.shape[0]
+            error = np.nanstd(mean_traces, 0) / np.sqrt(mean_traces.shape[0])
             ax.fill_between(np.arange(mean.shape[0]), mean-error, mean+error, alpha=0.5, linewidth=0, color=colors[i])
             ax.set_title(f'{gene} Mean Traces (w/ Std)')
         ax.plot(mean, label=f'{gene} (n = {n})', color=colors[i])

@@ -86,9 +86,9 @@ def get_traces(data,
 
 def get_trace(zplane, dorsal_mask, length=100):
     masked_zplane = zplane * dorsal_mask
-    sum_trace = masked_zplane.sum(axis=0)
-    mask_sum = dorsal_mask.sum(axis=0)
-    mean_trace = sum_trace / mask_sum
+    sum_trace = masked_zplane.sum(axis=0) # sum going down of masked image
+    mask_sum = dorsal_mask.sum(axis=0) # how many numbers of pixels per column
+    mean_trace = sum_trace / mask_sum # makes an average of each column in the embryo
     trace = mean_trace[mask_sum>0]
     inds = np.arange(trace.shape[0])
     standard_trace, _, _ = stats.binned_statistic(inds, trace, bins=length)
