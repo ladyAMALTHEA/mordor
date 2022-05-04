@@ -4,8 +4,12 @@ import csv
 from skimage.feature import canny
 import scipy.stats as stats
 from distinctipy import distinctipy
+from matplotlib import rcParams
 from matplotlib.colors import to_hex, to_rgb 
-plt.rcParams['svg.fonttype'] = 'none'
+
+rcParams['svg.fonttype'] = 'none'
+rcParams['font.family'] = ['Avenir']
+rcParams['font.size'] = 16
 
 def show_all_traces(all_traces, genotypes=None, genes=None, color_dict=None, individuals=False):
     if genotypes is None:
@@ -21,6 +25,7 @@ def show_all_traces(all_traces, genotypes=None, genes=None, color_dict=None, ind
         color_dict = get_color_dict(genotypes)
 
     fig, axs = plt.subplots(len(genes), 1, figsize=(10, 10*len(genes)))
+
     if not isinstance(axs, np.ndarray): axs = [axs]
     for ax, gene in zip(axs, genes):
         for genotype in genotypes:
@@ -34,11 +39,11 @@ def show_all_traces(all_traces, genotypes=None, genes=None, color_dict=None, ind
             if individuals:
                 for trace in mean_traces:
                     ax.plot(trace, alpha=0.5, linewidth=0.5, color=color_dict[genotype])    
-                ax.set_title(f'{gene} Mean Traces (w/ Individuals)')
+                ax.set_title(f'{gene} Individual Traces with Mean')
             else:
                 error = np.nanstd(mean_traces, 0) / np.sqrt(mean_traces.shape[0])
                 ax.fill_between(np.arange(mean.shape[0]), mean-error, mean+error, alpha=0.5, linewidth=0, color=color_dict[genotype])
-                ax.set_title(f'{gene} Mean Traces (w/ Std)')
+                ax.set_title(f'{gene}')
             
             ax.plot(mean, label=f'{genotype} (n = {n})', color=color_dict[genotype])
             ax.legend()
@@ -59,12 +64,12 @@ def show_genotype_traces(all_traces, genotype='wt', genes=None, individuals=Fals
         mean = np.nanmean(mean_traces, 0)
         if individuals:
             for trace in mean_traces:
-                ax.plot(trace, alpha=0.5, linewidth=0.5, color=colors[i])
-            ax.set_title(f'{gene} Mean Traces (w/ Individuals)')
+                ax.plot(trace, alpha=0.5, linewidth=1, color=colors[i])
+            ax.set_title(f'{gene} Individual Traces with Mean')
         else:
             error = np.nanstd(mean_traces, 0) / np.sqrt(mean_traces.shape[0])
             ax.fill_between(np.arange(mean.shape[0]), mean-error, mean+error, alpha=0.5, linewidth=0, color=colors[i])
-            ax.set_title(f'{gene} Mean Traces (w/ Std)')
+            ax.set_title(f'{gene}')
         ax.plot(mean, label=f'{gene} (n = {n})', color=colors[i])
         ax.legend()
     return fig
