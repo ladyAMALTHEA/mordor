@@ -1,0 +1,1 @@
+bad_eggs_old = ['pho_20210929_BCDKr_3', 'wt_20210920_BCDKr_17', 'wt_20210920_BCDKr_18']
