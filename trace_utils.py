@@ -225,7 +225,7 @@ def load_traces(filename):
     return pickled
 
 
-def format_trace_datastructure(trace_sets, excluded=None):
+def format_trace_datastructure_excluded(trace_sets, excluded=None):
     datastructure = {}
     for trace_set in trace_sets:
         for filename, file_data in trace_set.items():
@@ -243,6 +243,26 @@ def format_trace_datastructure(trace_sets, excluded=None):
                     else:
                         datastructure[genotype][gene] = np.append(datastructure[genotype][gene], this_array, 0)
     return datastructure
+
+
+def format_trace_datastructure_included(trace_sets, included=None): # olivia edit
+    datastructure = {}
+    for trace_set in trace_sets:
+        for filename, file_data in trace_set.items():
+            if included is not None and filename in included or f'{filename}.czi' in included:
+                genotype = file_data['genotype']
+                if genotype not in datastructure.keys():
+                    datastructure[genotype] = {}
+                for gene, traces in file_data['traces'].items():
+                    this_array = np.expand_dims(np.array(traces), 0) # [embryo, z_plane, trace] -> i.e. [# of embryos, 3, 100]
+                    if gene not in datastructure[genotype].keys():
+                        datastructure[genotype][gene] = this_array
+                    else:
+                        datastructure[genotype][gene] = np.append(datastructure[genotype][gene], this_array, 0)
+            else:
+                continue
+    return datastructure
+
 
 def imshow(img, ax, title):
     ax.imshow(img, cmap=plt.cm.gray)
