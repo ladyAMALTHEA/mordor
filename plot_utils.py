@@ -11,7 +11,7 @@ rcParams['svg.fonttype'] = 'none'
 rcParams['font.family'] = ['Avenir']
 rcParams['font.size'] = 16
 
-def show_all_traces(all_traces, genotypes=None, genes=None, color_dict=None, individuals=False):
+def show_all_traces(all_traces, genotypes=None, genes=None, color_dict=None, individuals=False, zeroed=False, xlim=[10,90], normalize=False):
     if genotypes is None:
         genotypes = list(all_traces.keys())
 
@@ -33,6 +33,10 @@ def show_all_traces(all_traces, genotypes=None, genes=None, color_dict=None, ind
                 continue
             traces = all_traces[genotype][gene]
             mean_traces = np.nanmean(traces, 1)
+            if zeroed:
+                mean_traces -= np.nanmean(mean_traces[:, xlim[0]:xlim[1]], 0).min()
+            if normalize:
+                mean_traces /= np.nanmean(mean_traces[:, xlim[0]:xlim[1]], 0).max()
             n = mean_traces.shape[0]
             mean = np.nanmean(mean_traces, 0)
 
@@ -46,11 +50,14 @@ def show_all_traces(all_traces, genotypes=None, genes=None, color_dict=None, ind
                 ax.set_title(f'{gene}')
             
             ax.plot(mean, label=f'{genotype} (n = {n})', color=color_dict[genotype])
-            ax.legend()
+        ax.legend()
+        ax.set_xlim(xlim)
+        if zeroed:
+            ax.set_ylim(ymin=0)
     
     return fig
 
-def show_genotype_traces(all_traces, genotype='wt', genes=None, individuals=False):
+def show_genotype_traces(all_traces, genotype='wt', genes=None, individuals=False, zeroed=False, xlim=[10,90], normalize=False):
     if genes is None:
         genes = list(all_traces[genotype].keys())
     fig, ax = plt.subplots(1, 1, figsize=(10, 10))
@@ -60,6 +67,10 @@ def show_genotype_traces(all_traces, genotype='wt', genes=None, individuals=Fals
             continue
         traces = all_traces[genotype][gene]
         mean_traces = np.nanmean(traces, 1)
+        if zeroed:
+            mean_traces -= np.nanmean(mean_traces[:, xlim[0]:xlim[1]], 0).min()
+        if normalize:
+            mean_traces /= np.nanmean(mean_traces[:, xlim[0]:xlim[1]], 0).max()
         n = mean_traces.shape[0]
         mean = np.nanmean(mean_traces, 0)
         if individuals:
@@ -71,6 +82,9 @@ def show_genotype_traces(all_traces, genotype='wt', genes=None, individuals=Fals
             ax.fill_between(np.arange(mean.shape[0]), mean-error, mean+error, alpha=0.5, linewidth=0, color=colors[i])
             ax.set_title(f'{gene}')
         ax.plot(mean, label=f'{gene} (n = {n})', color=colors[i])
+        ax.set_xlim(xlim)
+        if zeroed:
+            ax.set_ylim(ymin=0)
         ax.legend()
     return fig
 
