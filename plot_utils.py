@@ -35,8 +35,10 @@ def show_all_traces(all_traces, genotypes=None, genes=None, color_dict=None, ind
             mean_traces = np.nanmean(traces, 1)
             if zeroed:
                 mean_traces -= np.nanmean(mean_traces[:, xlim[0]:xlim[1]], 0).min()
+                #mean_traces -= np.nanmean(mean_traces, 0).min()
             if normalize:
-                mean_traces /= np.nanmean(mean_traces[:, xlim[0]:xlim[1]], 0).max()
+                # mean_traces /= np.nanmean(mean_traces[:, xlim[0]:xlim[1]], 0).max()
+                mean_traces /= np.nanmean(mean_traces, 0).max()
             n = mean_traces.shape[0]
             mean = np.nanmean(mean_traces, 0)
 
@@ -69,8 +71,10 @@ def show_genotype_traces(all_traces, genotype='wt', genes=None, individuals=Fals
         mean_traces = np.nanmean(traces, 1)
         if zeroed:
             mean_traces -= np.nanmean(mean_traces[:, xlim[0]:xlim[1]], 0).min()
+            #mean_traces -= np.nanmean(mean_traces, 0).min()
         if normalize:
             mean_traces /= np.nanmean(mean_traces[:, xlim[0]:xlim[1]], 0).max()
+            #mean_traces /= np.nanmean(mean_traces, 0).max()
         n = mean_traces.shape[0]
         mean = np.nanmean(mean_traces, 0)
         if individuals:
