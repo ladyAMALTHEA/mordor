@@ -11,7 +11,7 @@ rcParams['svg.fonttype'] = 'none'
 rcParams['font.family'] = ['Avenir']
 rcParams['font.size'] = 16
 
-def show_all_traces(all_traces, genotypes=None, genes=None, color_dict=None, individuals=False, zeroed=False, xlim=[10,90], normalize=False):
+def show_all_traces(all_traces, genotypes=None, genes=None, color_dict=None, individuals=False, zeroed=False, xlim=[10,90], normalize=False, ylim=None):
     if genotypes is None:
         genotypes = list(all_traces.keys())
 
@@ -54,8 +54,12 @@ def show_all_traces(all_traces, genotypes=None, genes=None, color_dict=None, ind
             ax.plot(mean, label=f'{genotype} (n = {n})', color=color_dict[genotype])
         ax.legend()
         ax.set_xlim(xlim)
+        ax.set_xlabel('Percent Embryo Length (%)')
+        ax.set_ylabel('Intensity (a.u.)')
         if zeroed:
             ax.set_ylim(ymin=0)
+        if ylim is not None:
+            ax.set_ylim(ylim)
     
     return fig
 
@@ -100,11 +104,11 @@ def get_color_dict(genotypes):
         genotypes.remove('wt')
 
     if 'pho' in genotypes:
-        color_dict['pho'] = '#B90E0A'
+        color_dict['pho'] = '#F4B942'
         genotypes.remove('pho')
 
     if 'esc' in genotypes:
-        color_dict['esc'] = '#0063cc'
+        color_dict['esc'] = '#6B9AC4'
         genotypes.remove('esc')
     
     exclude = list(to_rgb(color) for color in color_dict.values())
