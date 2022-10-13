@@ -6,12 +6,13 @@ import scipy.stats as stats
 from distinctipy import distinctipy
 from matplotlib import rcParams
 from matplotlib.colors import to_hex, to_rgb 
+import seaborn as sns
 
 rcParams['svg.fonttype'] = 'none'
 rcParams['font.family'] = ['Avenir']
 rcParams['font.size'] = 16
 
-def show_all_traces(all_traces, genotypes=None, genes=None, color_dict=None, individuals=False, zeroed=False, xlim=[10,90], normalize=False, ylim=None):
+def show_all_traces(all_traces, genotypes=None, genes=None, color_dict=None, individuals=False, zeroed=False, xlim=[5,95], normalize=False, ylim=None):
     if genotypes is None:
         genotypes = list(all_traces.keys())
 
@@ -37,7 +38,7 @@ def show_all_traces(all_traces, genotypes=None, genes=None, color_dict=None, ind
                 mean_traces -= np.nanmean(mean_traces[:, xlim[0]:xlim[1]], 0).min()
                 #mean_traces -= np.nanmean(mean_traces, 0).min()
             if normalize:
-                # mean_traces /= np.nanmean(mean_traces[:, xlim[0]:xlim[1]], 0).max()
+                #mean_traces /= np.nanmean(mean_traces[:, xlim[0]:xlim[1]], 0).max()
                 mean_traces /= np.nanmean(mean_traces, 0).max()
             n = mean_traces.shape[0]
             mean = np.nanmean(mean_traces, 0)
@@ -52,10 +53,14 @@ def show_all_traces(all_traces, genotypes=None, genes=None, color_dict=None, ind
                 ax.set_title(f'{gene}')
             
             ax.plot(mean, label=f'{genotype} (n = {n})', color=color_dict[genotype])
-        ax.legend()
+        ax.legend(frameon=False)
         ax.set_xlim(xlim)
         ax.set_xlabel('Percent Embryo Length (%)')
         ax.set_ylabel('Intensity (a.u.)')
+        ax.spines.right.set_visible(False)
+        ax.spines.top.set_visible(False)
+        ax.yaxis.set_ticks_position('left')
+        ax.xaxis.set_ticks_position('bottom')
         if zeroed:
             ax.set_ylim(ymin=0)
         if ylim is not None:
@@ -93,7 +98,11 @@ def show_genotype_traces(all_traces, genotype='wt', genes=None, individuals=Fals
         ax.set_xlim(xlim)
         if zeroed:
             ax.set_ylim(ymin=0)
-        ax.legend()
+        ax.legend(frameon=False)
+        ax.spines.right.set_visible(False)
+        ax.spines.top.set_visible(False)
+        ax.yaxis.set_ticks_position('left')
+        ax.xaxis.set_ticks_position('bottom')
     return fig
 
 def get_color_dict(genotypes):
@@ -104,20 +113,21 @@ def get_color_dict(genotypes):
         genotypes.remove('wt')
 
     if 'pho' in genotypes:
-        color_dict['pho'] = '#F4B942'
+        color_dict['pho'] = '#349B87'
         genotypes.remove('pho')
 
     if 'esc' in genotypes:
-        color_dict['esc'] = '#6B9AC4'
+        color_dict['esc'] = '#882255'
         genotypes.remove('esc')
     
-    exclude = list(to_rgb(color) for color in color_dict.values())
-    exclude.append(to_rgb('#ffffff'))
+    # exclude = list(to_rgb(color) for color in color_dict.values())
+    # exclude.append(to_rgb('#ffffff'))
 
-    colors = distinctipy.get_colors(len(genotypes), 
-                                    exclude, 
-                                    colorblind_type="Deuteranomaly")
-    for color, genotype in zip(colors, genotypes):
-        color_dict[genotype] = to_hex(color)
-    
+    # # colors = distinctipy.get_colors(len(genotypes), 
+    #                                 exclude, 
+    #                                 colorblind_type="Deuteranomaly")
+    # colors = sns.color_palette("rocket")
+
+    # for colors, genotype in zip(colors, genotypes):
+    #     color_dict[genotype] = to_hex(colors)
     return color_dict
